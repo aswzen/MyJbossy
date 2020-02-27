@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MyJbossy</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+    <script type="text/javascript" src="http://rawgit.com/vitmalina/w2ui/master/dist/w2ui.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="http://rawgit.com/vitmalina/w2ui/master/dist/w2ui.min.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="http://w2ui.com/web/demos/index.css"/>
+
+    <style>
+        * {
+	    margin: 0px;
+	    padding: 0px;
+	    box-sizing: border-box;
+	}
+
+	body {
+	    overflow: hidden;
+	    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	    font-size: 14px;
+	}
+	.title{
+	    font-weight:bold;
+	    font-size:22px;
+	}
+    </style>
+</head>
+<body>
+
+<div id="main_layout" style="position: absolute;width: 100%; height: 100%"></div>
+
+<script type="text/javascript">
+$(function () {
+    var pstyle = 'border: 1px solid #dfdfdf; padding: 5px;';
+    var main_layout = $('#main_layout').w2layout({
+        name: 'main_layout',
+        panels: [
+            { type: 'top', size: 45, style: 'padding:5px;border: 0px; border-bottom: 1px solid silver; background-color: #fff; color: #555;', overflow: 'hidden', content: '<div class="title"> MyJbossy<img src="https://design.jboss.org/wildfly/logo/final/wildfly_logo_100px.png" style="height:25px;"/></div>'},
+            { type: 'left', size: 240, resizable: true, style: 'border-right: 1px solid silver;' },
+            { type: 'main', style: 'background-color: white;', content: '<div id="grid" style="width: 100%; height: 100%;"></div>' }
+        ]
+    });
+
+    w2ui['main_layout'].content('left', $().w2sidebar({
+        name: 'demo-sidebar',
+        img: null,
+        nodes: [
+            { id: 'devList', text: 'Development List', img: 'icon-page' },
+            { id: 'prodList', text: 'Production List', img: 'icon-page' },
+        ],
+        onClick: function (event) {
+            var cmd = event.target;
+            if (parseInt(cmd.substr(cmd.length-1)) != cmd.substr(cmd.length-1)) return;
+            var tmp = w2ui['demo-sidebar'].get(cmd);
+            document.title = tmp.parent.text + ': ' + tmp.text + ' | w2ui';
+            // delete previously created items
+            for (var widget in w2ui) {
+                var nm = w2ui[widget].name;
+                if (['main_layout', 'demo-sidebar'].indexOf(nm) == -1) $().w2destroy(nm);
+            }
+            // set hash
+            if (tmp.parent && tmp.parent.id != '') {
+                var pid = w2ui['demo-sidebar'].get(cmd).parent.id;
+                document.location.hash = '!'+ pid + '/' + cmd;
+            }
+            // load example
+            $.get('examples/'+ cmd +'.html', function (data) {
+                
+            });
+        }
+    }));
+
+    $('#grid').w2grid({ 
+        name: 'grid', 
+        url: 'results',
+        method: 'GET', 
+        columns: [                
+            { field: 'name', text: 'Name', size: '12%' },
+            { field: 'ip', text: 'IP', size: '12%' },
+            { field: 'port', text: 'Port', size: '5%' },
+            { field: 'type', text: 'Type', size: '10%' },
+            { field: 'version', text: 'Version', size: '10%' },
+            { field: 'state', text: 'State', size: '5' },
+            { field: 'app', text: 'Application', size: '50%' },
+        ]
+    });    
+});
+</script>
+
+</body>
+</html>
