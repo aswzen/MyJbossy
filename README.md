@@ -21,7 +21,7 @@ Run below command in sequence
 4. Creating environment
 `python3 -m venv venv` or by `py -3 -m venv venv`
 5. Activate the environment
-`. venv/bin/activate` `. venv/scripts/activate`
+`. venv/bin/activate` or by `. venv/scripts/activate`
 6. Installing the flask framework 
 `pip install Flask`
 7. Setting flask app main file
