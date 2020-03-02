@@ -22,7 +22,7 @@ def verify_password(username, password):
     if username in users:
         return check_password_hash(users.get(username), password)
     return False
-    
+
 @app.route('/')
 @auth.login_required
 def root():
@@ -54,6 +54,7 @@ def load(ip=None,username=None,password=None):
     return r.text
 
 def getState(warName=None,ip=None,username=None,password=None):
+    warName = urllib.parse.quote_plus(warName)
     url = "http://"+ip+"/management/deployment/"+warName+"?operation=attribute&name=enabled"
     r = requests.get(url,
                      proxies={"http": "http://10.0.144.183:8080"},
@@ -64,51 +65,9 @@ def getState(warName=None,ip=None,username=None,password=None):
 
 @app.route('/results')
 def results():
-    data = {
-        "total": 2,
-        "records": [{
-            "ip"		: "10.64.20.67",
-            "port"		: "9990",
-            "username"	: "sigit",
-            "password"	: "sigit"
-        }, {
-            "ip"		: "10.64.20.128",
-            "port"		: "9990",
-            "username"	: "sigit",
-            "password"	: "sigit"
-        }, {
-            "ip"		: "10.64.20.159",
-            "port"		: "9990",
-            "username"	: "sigit",
-            "password"	: "sigit"
-        }, {
-            "ip"		: "10.64.20.167",
-            "port"		: "9990",
-            "username"	: "sigit",
-            "password"	: "sigit"
-        }, {
-            "ip"		: "10.64.20.173",
-            "port"		: "9990",
-            "username"	: "sigit",
-            "password"	: "sigit"
-        }, {
-            "ip"		: "10.64.17.12",
-            "port"		: "9990",
-            "username"	: "edw",
-            "password"	: "password"
-        }, {
-            "ip"		: "10.64.17.13",
-            "port"		: "9990",
-            "username"	: "edw",
-            "password"	: "password"
-        }, {
-            "ip"		: "10.64.17.20",
-            "port"		: "9990",
-            "username"	: "edw",
-            "password"	: "password"
-        }]
-    }
-
+    with open("config.json", 'r') as file:
+        data = file.read()
+    data = json.loads(data)
     records = data["records"]
 
     for index,f in enumerate(records, start=0):
@@ -123,8 +82,8 @@ def results():
             runningWar = "N/A"
             for index2, f2 in enumerate(json_data["deployment"], start=0):
                 warRes = getState(f2,f["ip"]+":"+f["port"],f["username"],f["password"])
-                if warRes == "true":
-                    data["records"][index]["app"] = data["records"][index]["app"]+"<div style='padding:2px;'>"+f2+"</div>"
+                #if warRes == "true":
+                data["records"][index]["app"] = data["records"][index]["app"]+warRes+"~"+f2+"###"
             data["records"][index]["username"] = ""
             data["records"][index]["password"] = ""
         except:
