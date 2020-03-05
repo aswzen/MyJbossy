@@ -1,10 +1,12 @@
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, request, Response, jsonify
 import requests
 from requests.auth import HTTPDigestAuth
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.datastructures import ImmutableMultiDict
 import urllib
 import json
+import base64
 
 app = Flask(__name__,
             static_folder='assets',
@@ -62,6 +64,35 @@ def getState(warName=None,ip=None,username=None,password=None):
                      )
     return r.text
 
+@app.route('/deploy', methods=['POST'])
+def deploy():
+    content = request.form.get('content')
+    dataContent = base64.b64decode(content)
+    url = request.form.get('url')
+    url = url+"/management"
+    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+    r = requests.post(url,
+        data = dataContent,
+        proxies={"http": "http://10.0.144.183:8080"},
+        auth=HTTPDigestAuth('sigit', 'sigit'),
+        headers=headers
+    )
+    return r.content
+
+@app.route('/undeploy', methods=['POST'])
+def undeploy():
+    content = request.form.get('content')
+    dataContent = base64.b64decode(content)
+    url = request.form.get('url')
+    url = url+"/management"
+    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+    r = requests.post(url,
+        data = dataContent,
+        proxies={"http": "http://10.0.144.183:8080"},
+        auth=HTTPDigestAuth('sigit', 'sigit'),
+        headers=headers
+    )
+    return r.content
 
 @app.route('/results')
 def results():
@@ -74,6 +105,8 @@ def results():
         try:
             res = load(f["ip"]+":"+f["port"],f["username"],f["password"])
             json_data = json.loads(res)
+            idCom = data["records"][index]["ip"].replace(".","")+data["records"][index]["port"]+"_"+str(index)
+            data["records"][index]["id"] = "WAR_"+idCom
             data["records"][index]["name"] = json_data["name"]
             data["records"][index]["type"] = json_data["product-name"]
             data["records"][index]["version"] = json_data["product-version"]
@@ -87,6 +120,8 @@ def results():
             data["records"][index]["username"] = ""
             data["records"][index]["password"] = ""
         except:
+            idCom = data["records"][index]["ip"].replace(".","")+data["records"][index]["port"]+"_"+str(index)
+            data["records"][index]["id"] = "WAR_"+idCom
             data["records"][index]["name"] = "N/A"
             data["records"][index]["type"] = "N/A"
             data["records"][index]["version"] = "N/A"

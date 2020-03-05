@@ -27,6 +27,31 @@
     .w2ui-grid .w2ui-grid-body table td.w2ui-grid-data {
         vertical-align: top;
     }
+    .btn-simple {
+        box-shadow:inset 0px 1px 3px 0px #91b8b3;
+        background:linear-gradient(to bottom, #768d87 5%, #6c7c7c 100%);
+        background-color:#768d87;
+        border-radius:5px;
+        border:1px solid #566963;
+        display:inline-block;
+        cursor:pointer;
+        color:#ffffff;
+        font-family:Arial;
+        font-size:11px;
+        padding:2px 2px;
+        text-decoration:none;
+        text-shadow:0px -1px 0px #2b665e;
+    }
+    .btn-simple:hover {
+        background:linear-gradient(to bottom, #6c7c7c 5%, #768d87 100%);
+        background-color:#6c7c7c;
+    }
+    .btn-simple:active {
+        position:relative;
+        top:1px;
+    }
+
+            
     </style>
 </head>
 <body>
@@ -83,9 +108,15 @@ $(function () {
             { field: 'name', caption: 'Name', size: '12%' },
             { field: 'ip', caption: 'IP', size: '9%' },
             { field: 'port', caption: 'Port', size: '4%' },
-            { field: 'type', caption: 'Type', size: '10%' },
+            { field: 'type', caption: 'Type', size: '9%' },
             { field: 'version', caption: 'Version', size: '8%' },
             { field: 'state', caption: 'State', size: '4%' },
+            { field: 'cache', caption: 'Cache', size: '4%',
+                render: function (record, index, column_index) {
+                    var html = "<button class=\"btn-simple\" onClick=\"reloadCache('http://"+record.ip+":8080/api/v1/cache/reload-all-cache1')\" >Load</button>";
+                    return html;
+                }
+            },
             { field: 'app', caption: 'Application', size: '50%', height: 'auto',
                 render: function (record, index, column_index) {
                     var html = "<div style=''>";
@@ -99,9 +130,9 @@ $(function () {
                                 continue;
                             }
                             if(content[0] == "true"){
-                                html = html+'<div style="font-size: 11px; line-height: 17px;"><i class="w2ui-icon-check" style="color: #00D700;float: left; width: 20px; padding: 2px 3px;"></i>  ' + content[1] +'</div>';
+                                html = html+'<div style="font-size: 11px; line-height: 17px;"> <i class="w2ui-icon-check" style="color: #00D700;float: left; width: 20px; padding: 2px 3px;"></i> <button class="btn-simple" id="btnUnDep_'+record.id+'_'+i+'" onClick="undeploy(\''+record.id+'_'+i+'\', \'http://'+record.ip+':'+record.port+'\',\''+content[1]+'\')" >Undeploy</button> ' + content[1] +'</div>';
                             } else {
-                                html = html+'<div style="font-size: 11px; line-height: 17px;color:#929292"><i class="w2ui-icon-cross" style="color: #FF2424;float: left; width: 20px; padding: 2px 3px;"></i>  ' + content[1] +'</div>';
+                                html = html+'<div style="font-size: 11px; line-height: 17px;color:#929292"> <i class="w2ui-icon-cross" style="color: #FF2424;float: left; width: 20px; padding: 2px 3px;"></i> <button class="btn-simple" id="btnDep_'+record.id+'_'+i+'" onClick="deploy(\''+record.id+'_'+i+'\', \'http://'+record.ip+':'+record.port+'\',\''+content[1]+'\')" >Deploy</button> ' + content[1] +'</div>';
                             }
                         };
                     }
@@ -112,6 +143,89 @@ $(function () {
         ]
     });    
 });
+
+function deploy(id, url, content){
+    if(confirm('Do you want to deploy this?')){
+        $('#btnDep_'+id).attr('disabled', true);
+        $('#btnDep_'+id).text('Processing...');
+        $.ajax({
+            url: 'monitoring/deploy',
+            method: 'POST',
+            async: true,
+            cache: false,
+            dataType: 'json',
+            data: {
+                "url": url,
+                "content": btoa("{\"operation\":\"composite\",\"address\":[],\"steps\":[{\"operation\":\"deploy\",\"address\":{\"deployment\": \""+content+"\"}}]}")
+            },
+            success: function(result){
+                alert(JSON.stringify(result));
+                if(result.outcome == "success"){
+                    $('#btnDep_'+id).removeAttr('disabled');
+                    $('#btnDep_'+id).text('Undeploy');
+                    $('#btnDep_'+id).siblings('.w2ui-icon-cross').addClass('w2ui-icon-check').removeClass('w2ui-icon-cross').css('color','#00D700');
+                } else {
+                    $('#btnDep_'+id).removeAttr('disabled');
+                    $('#btnDep_'+id).text('Deploy');
+                }
+            },
+            error: function(result){
+                alert(result);
+                $('#btnDep_'+id).removeAttr('disabled');
+                $('#btnDep_'+id).text('Deploy');
+            }
+        });
+    }
+}
+
+function undeploy(id, url, content){
+    if(confirm('Do you want to undeploy this?')){
+        $('#btnUnDep_'+id).attr('disabled', true);
+        $('#btnUnDep_'+id).text('Processing...');
+        $.ajax({
+            url: 'monitoring/undeploy',
+            method: 'POST',
+            async: true,
+            cache: false,
+            dataType: 'json',
+            data: {
+                "url": url,
+                "content": btoa("{\"operation\":\"composite\",\"address\":[],\"steps\":[{\"operation\":\"undeploy\",\"address\":{\"deployment\": \""+content+"\"}}]}")
+            },
+            success: function(result){
+                alert(JSON.stringify(result));
+                if(result.outcome == "success"){
+                    $('#btnUnDep_'+id).removeAttr('disabled');
+                    $('#btnUnDep_'+id).text('Deploy');
+                    $('#btnUnDep_'+id).siblings('.w2ui-icon-check').addClass('w2ui-icon-cross').removeClass('w2ui-icon-check').css('color','#FF2424'); 
+                } else {
+                    $('#btnUnDep_'+id).removeAttr('disabled');
+                    $('#btnUnDep_'+id).text('Undeploy');
+                }
+            },
+            error: function(result){
+                alert(result);
+                $('#btnUnDep_'+id).removeAttr('disabled');
+                $('#btnUnDep_'+id).text('Undeploy');
+            }
+        });
+    }
+}
+
+function reloadCache(url){
+    window.open(url, "_blank", "toolbar=no,top=500,left=500,width=400,height=400");
+    /*$.ajax({
+      url: url,
+      cache: false,
+      success: function(result){
+        if(result.success){
+            alert('Reload Success');
+        } else {
+            alert('Reload Failed');
+        }
+      }
+    });*/
+}
 </script>
 
 </body>

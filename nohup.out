@@ -1,0 +1,27 @@
+ * Serving Flask app "main.py"
+ * Environment: production
+   WARNING: This is a development server. Do not use it in a production deployment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+ * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+10.64.20.122 - - [28/Feb/2020 10:00:38] "[37mGET / HTTP/1.1[0m" 200 -
+10.64.20.122 - - [28/Feb/2020 10:00:42] "[37mGET //results?request=%7B%22cmd%22%3A%22get%22%2C%22selected%22%3A%5B%5D%2C%22limit%22%3A100%2C%22offset%22%3A0%7D HTTP/1.1[0m" 200 -
+10.64.20.122 - - [28/Feb/2020 10:33:10] "[31m[1mGET / HTTP/1.1[0m" 401 -
+10.64.20.122 - - [28/Feb/2020 10:33:15] "[37mGET / HTTP/1.1[0m" 200 -
+10.64.20.122 - - [28/Feb/2020 10:33:19] "[37mGET //results?request=%7B%22cmd%22%3A%22get%22%2C%22selected%22%3A%5B%5D%2C%22limit%22%3A100%2C%22offset%22%3A0%7D HTTP/1.1[0m" 200 -
+10.64.20.122 - - [28/Feb/2020 10:48:15] "[31m[1mGET / HTTP/1.1[0m" 401 -
+10.64.20.122 - - [28/Feb/2020 11:05:45] "[37mGET / HTTP/1.1[0m" 200 -
+10.64.20.122 - - [28/Feb/2020 11:05:49] "[37mGET //results?request=%7B%22cmd%22%3A%22get%22%2C%22selected%22%3A%5B%5D%2C%22limit%22%3A100%2C%22offset%22%3A0%7D HTTP/1.1[0m" 200 -
+10.64.20.122 - - [28/Feb/2020 11:40:03] "[31m[1mGET / HTTP/1.1[0m" 401 -
+10.64.20.122 - - [28/Feb/2020 11:40:15] "[37mGET / HTTP/1.1[0m" 200 -
+10.64.20.122 - - [28/Feb/2020 11:40:20] "[37mGET //results?request=%7B%22cmd%22%3A%22get%22%2C%22selected%22%3A%5B%5D%2C%22limit%22%3A100%2C%22offset%22%3A0%7D HTTP/1.1[0m" 200 -
+10.64.20.122 - - [28/Feb/2020 13:31:22] "[37mGET / HTTP/1.1[0m" 200 -
+10.64.20.122 - - [28/Feb/2020 13:31:26] "[37mGET //results?request=%7B%22cmd%22%3A%22get%22%2C%22selected%22%3A%5B%5D%2C%22limit%22%3A100%2C%22offset%22%3A0%7D HTTP/1.1[0m" 200 -
+10.64.20.122 - - [28/Feb/2020 14:13:51] "[37mGET / HTTP/1.1[0m" 200 -
+10.64.20.122 - - [28/Feb/2020 14:13:55] "[37mGET //results?request=%7B%22cmd%22%3A%22get%22%2C%22selected%22%3A%5B%5D%2C%22limit%22%3A100%2C%22offset%22%3A0%7D HTTP/1.1[0m" 200 -
+10.64.20.122 - - [28/Feb/2020 14:15:11] "[37mGET / HTTP/1.1[0m" 200 -
+10.64.20.122 - - [28/Feb/2020 14:15:15] "[37mGET //results?request=%7B%22cmd%22%3A%22get%22%2C%22selected%22%3A%5B%5D%2C%22limit%22%3A100%2C%22offset%22%3A0%7D HTTP/1.1[0m" 200 -
+10.64.20.122 - - [28/Feb/2020 14:15:40] "[37mGET / HTTP/1.1[0m" 200 -
+10.64.20.122 - - [28/Feb/2020 14:15:44] "[37mGET //results?request=%7B%22cmd%22%3A%22get%22%2C%22selected%22%3A%5B%5D%2C%22limit%22%3A100%2C%22offset%22%3A0%7D HTTP/1.1[0m" 200 -
+10.64.20.122 - - [28/Feb/2020 14:15:45] "[37mGET / HTTP/1.1[0m" 200 -
+10.64.20.122 - - [28/Feb/2020 14:15:48] "[37mGET //results?request=%7B%22cmd%22%3A%22get%22%2C%22selected%22%3A%5B%5D%2C%22limit%22%3A100%2C%22offset%22%3A0%7D HTTP/1.1[0m" 200 -
