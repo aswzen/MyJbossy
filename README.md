@@ -7,6 +7,13 @@
 
 This app allows you the see current deployed war/jar files in some servers, by using their (Jboss and Wildfly) APIs we can get so many information about the packages.
 
+### To Do ###
+- [ ] Multiple environment
+- [ ] Restart jboss/wildfly feature
+- [ ] Upload package feature
+- [ ] Lookup log
+- [ ] Library installer
+
 ### Requirements ###
 
 - Python 3
