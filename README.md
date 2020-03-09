@@ -43,3 +43,5 @@ If you want to make it accessible from outside network you can use
 - [w2ui](http://w2ui.com/)
 - [JBOSS Api Docs](https://docs.jboss.org/author/display/WFLY10/The+HTTP+management+API)
 - [JBoss EAP 7.2 Model Reference](http://wildscribe.github.io/)
+- [JBoss HTTP Api doc](https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/6.4/html/administration_and_configuration_guide/sect-deploy_with_the_http_api)
+
