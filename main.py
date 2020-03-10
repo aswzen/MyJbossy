@@ -94,6 +94,21 @@ def undeploy():
     )
     return r.content
 
+@app.route('/remove', methods=['POST'])
+def remove():
+    content = request.form.get('content')
+    dataContent = base64.b64decode(content)
+    url = request.form.get('url')
+    url = url+"/management"
+    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+    r = requests.post(url,
+        data = dataContent,
+        proxies={"http": "http://10.0.144.183:8080"},
+        auth=HTTPDigestAuth('sigit', 'sigit'),
+        headers=headers
+    )
+    return r.content
+
 @app.route('/results')
 def results():
     with open("config.json", 'r') as file:

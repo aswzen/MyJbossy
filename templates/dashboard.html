@@ -28,29 +28,37 @@
         vertical-align: top;
     }
     .btn-simple {
-        box-shadow:inset 0px 1px 3px 0px #91b8b3;
-        background:linear-gradient(to bottom, #768d87 5%, #6c7c7c 100%);
-        background-color:#768d87;
-        border-radius:5px;
-        border:1px solid #566963;
+        background-image: linear-gradient(#f9f9f9,#e4e4e4);
+        color: #111;
+        text-shadow: none;
+        border-radius: 0px;
+        border: 1px solid #aeadad;
+        box-shadow: 0px 1px 2px 0px #b7b7b7;
+        width: 55px;
         display:inline-block;
         cursor:pointer;
-        color:#ffffff;
         font-family:Arial;
         font-size:11px;
         padding:2px 2px;
         text-decoration:none;
-        text-shadow:0px -1px 0px #2b665e;
     }
     .btn-simple:hover {
-        background:linear-gradient(to bottom, #6c7c7c 5%, #768d87 100%);
-        background-color:#6c7c7c;
+        background-image: linear-gradient(#DDDDDD,#e4e4e4);
+        color: #000;
     }
     .btn-simple:active {
         position:relative;
         top:1px;
     }
-
+    .detail-wrap{
+        font-size: 11px; 
+        line-height: 22px;
+    }
+    .detail-wrap-disabled{
+        font-size: 11px; 
+        line-height: 22px;
+        color:#929292;
+    }
             
     </style>
 </head>
@@ -105,19 +113,19 @@ $(function () {
         method: 'GET',  
         recordHeight : '50',
         columns: [                
-            { field: 'name', caption: 'Name', size: '12%' },
-            { field: 'ip', caption: 'IP', size: '9%' },
-            { field: 'port', caption: 'Port', size: '4%' },
-            { field: 'type', caption: 'Type', size: '9%' },
-            { field: 'version', caption: 'Version', size: '8%' },
-            { field: 'state', caption: 'State', size: '4%' },
-            { field: 'cache', caption: 'Cache', size: '4%',
+            { field: 'name', caption: 'Name', size: '100px' },
+            { field: 'ip', caption: 'IP', size: '100px' },
+            { field: 'port', caption: 'Port', size: '50px' },
+            { field: 'type', caption: 'Type', size: '90px' },
+            { field: 'version', caption: 'Version', size: '70px' },
+            { field: 'state', caption: 'State', size: '50px' },
+            { field: 'cache', caption: 'Cache', size: '60px',
                 render: function (record, index, column_index) {
-                    var html = "<button class=\"btn-simple\" onClick=\"reloadCache('http://"+record.ip+":8080/api/v1/cache/reload-all-cache1')\" >Load</button>";
+                    var html = "<button style=\"width:50px\" class=\"btn-simple\" onClick=\"reloadCache('http://"+record.ip+":8080/api/v1/cache/reload-all-cache1')\" >Load</button>";
                     return html;
                 }
             },
-            { field: 'app', caption: 'Application', size: '50%', height: 'auto',
+            { field: 'app', caption: 'Action', size: '150px', height: 'auto',
                 render: function (record, index, column_index) {
                     var html = "<div style=''>";
                     if(record.app == "N/A"){
@@ -130,9 +138,32 @@ $(function () {
                                 continue;
                             }
                             if(content[0] == "true"){
-                                html = html+'<div style="font-size: 11px; line-height: 17px;"> <i class="w2ui-icon-check" style="color: #00D700;float: left; width: 20px; padding: 2px 3px;"></i> <button class="btn-simple" id="btnUnDep_'+record.id+'_'+i+'" onClick="undeploy(\''+record.id+'_'+i+'\', \'http://'+record.ip+':'+record.port+'\',\''+content[1]+'\')" >Undeploy</button> ' + content[1] +'</div>';
+                                html = html+'<div class="detail-wrap"> <button class="btn-simple" style="width:20px;background:none;background-color:#fff"><i class="w2ui-icon-check" style="color: #00D700; width: 20px;"></i></button> <button class="btn-simple" id="btnUnDep_'+record.id+'_'+i+'" onClick="undeploy(\''+record.id+'_'+i+'\', \'http://'+record.ip+':'+record.port+'\',\''+content[1]+'\')" >Undeploy</button> <button class="btn-simple" onClick="remove(\''+record.id+'_'+i+'\', \'http://'+record.ip+':'+record.port+'\',\''+content[1]+'\')" id="btnRem_'+record.id+'_'+i+'" >Remove</button></div>';
                             } else {
-                                html = html+'<div style="font-size: 11px; line-height: 17px;color:#929292"> <i class="w2ui-icon-cross" style="color: #FF2424;float: left; width: 20px; padding: 2px 3px;"></i> <button class="btn-simple" id="btnDep_'+record.id+'_'+i+'" onClick="deploy(\''+record.id+'_'+i+'\', \'http://'+record.ip+':'+record.port+'\',\''+content[1]+'\')" >Deploy</button> ' + content[1] +'</div>';
+                                html = html+'<div class="detail-wrap-disabled"> <button class="btn-simple" style="width:20px;background:none;background-color:#fff"><i class="w2ui-icon-cross" style="color: #FF2424;width: 20px;"></i></button> <button class="btn-simple" id="btnDep_'+record.id+'_'+i+'" onClick="deploy(\''+record.id+'_'+i+'\', \'http://'+record.ip+':'+record.port+'\',\''+content[1]+'\')" >Deploy</button> <button class="btn-simple" onClick="remove(\''+record.id+'_'+i+'\', \'http://'+record.ip+':'+record.port+'\',\''+content[1]+'\')" id="btnRem_'+record.id+'_'+i+'"  >Remove</button></div>';
+                            }
+                        };
+                    }
+                    html = html+"</div>";
+                    return html;
+                }
+            },
+            { field: 'app', caption: 'Application', size: '600px', height: 'auto',
+                render: function (record, index, column_index) {
+                    var html = "<div style=''>";
+                    if(record.app == "N/A"){
+                        html = html+"N/A";
+                    } else {
+                        var data = record.app.split("###");
+                        for (var i = 0; i < data.length; i++) {
+                            content = data[i].split("~");
+                            if(data[i] == null || data[i] == "" || content == undefined || content == null){
+                                continue;
+                            }
+                            if(content[0] == "true"){
+                                html = html+'<div class="detail-wrap">' + content[1] +'</div>';
+                            } else {
+                                html = html+'<div class="detail-wrap-disabled">' + content[1] +'</div>';
                             }
                         };
                     }
@@ -145,7 +176,7 @@ $(function () {
 });
 
 function deploy(id, url, content){
-    if(confirm('Do you want to deploy this?')){
+    if(confirm('Do you want to deploy this package?')){
         $('#btnDep_'+id).attr('disabled', true);
         $('#btnDep_'+id).text('Processing...');
         $.ajax({
@@ -179,7 +210,7 @@ function deploy(id, url, content){
 }
 
 function undeploy(id, url, content){
-    if(confirm('Do you want to undeploy this?')){
+    if(confirm('Do you want to undeploy this package?')){
         $('#btnUnDep_'+id).attr('disabled', true);
         $('#btnUnDep_'+id).text('Processing...');
         $.ajax({
@@ -207,6 +238,33 @@ function undeploy(id, url, content){
                 alert(result);
                 $('#btnUnDep_'+id).removeAttr('disabled');
                 $('#btnUnDep_'+id).text('Undeploy');
+            }
+        });
+    }
+}
+
+function remove(id, url, content){
+    if(confirm('Do you want to remove this package?')){
+        $('#btnRem_'+id).attr('disabled', true);
+        $('#btnRem_'+id).text('Processing...');
+        $.ajax({
+            url: 'monitoring/remove',
+            method: 'POST',
+            async: true,
+            cache: false,
+            dataType: 'json',
+            data: {
+                "url": url,
+                "content": btoa("{\"operation\":\"composite\",\"address\":[],\"steps\":[{\"operation\":\"remove\",\"address\":{\"deployment\": \""+content+"\"}}]}")
+            },
+            success: function(result){
+                alert(JSON.stringify(result));
+                w2ui['grid'].reload();
+            },
+            error: function(result){
+                alert(result);
+                $('#btnRem_'+id).removeAttr('disabled');
+                $('#btnRem_'+id).text('Remove');
             }
         });
     }
