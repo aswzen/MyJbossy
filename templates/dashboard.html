@@ -1,28 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>MyJbossy</title>
+    <title>JDL - Jboss Deployment Lookup</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link rel="stylesheet" type="text/css" media="screen" href="http://w2ui.com/src/w2ui-1.5.rc1.min.css" id="mainCSS" />
-    <link rel="stylesheet" type="text/css" media="screen" href="http://w2ui.com/web/demos/index.css"/>
-    <script type="text/javascript" src="http://w2ui.com/web/js/jquery-2.1.1.min.js"></script>
-    <script type="text/javascript" src="http://w2ui.com/src/w2ui-1.5.rc1.min.js"></script>
+    <link rel="stylesheet" type="text/css" media="screen" href="https://cdn.jsdelivr.net/npm/w2ui@1.5.3/w2ui-1.5.min.css" id="mainCSS" />
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/w2ui@1.5.3/w2ui-1.5.min.js"></script>
 
     <style>
-        * {
+    * {
 	    margin: 0px;
 	    padding: 0px;
 	    box-sizing: border-box;
 	}
-
+    .title{
+        font-size: 24px;
+        margin-left: 15px;
+        font-family: Verdana;
+    }
+    .w2ui-panel-content{
+        background: #ffffff;
+        background: -moz-linear-gradient(top, #ffffff 0%, #e5e5e5 100%);
+        background: -webkit-linear-gradient(top, #ffffff 0%,#e5e5e5 100%);
+        background: linear-gradient(to bottom, #ffffff 0%,#e5e5e5 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=0 );
+    }
 	body {
 	    overflow: hidden;
 	    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	    font-size: 14px;
-	}
-	.title{
-	    font-weight:bold;
-	    font-size:22px;
 	}
     .w2ui-grid .w2ui-grid-body table td.w2ui-grid-data {
         vertical-align: top;
@@ -59,6 +65,9 @@
         line-height: 22px;
         color:#929292;
     }
+    span.title-small {
+        font-size: 12px;
+    }
             
     </style>
 </head>
@@ -69,111 +78,240 @@
 <script type="text/javascript">
 $(function () {
     var pstyle = 'border: 1px solid #dfdfdf; padding: 5px;';
+    var mainContent = '<p style="padding:10px">Welcome to JDL, <b>{{username}}</b></p>';
     var main_layout = $('#main_layout').w2layout({
         name: 'main_layout',
         panels: [
-            { type: 'top', size: 45, style: 'padding:5px;border: 0px; border-bottom: 1px solid silver; background-color: #fff; color: #555;', overflow: 'hidden', content: '<div class="title"> MyJbossy<img src="https://design.jboss.org/wildfly/logo/final/wildfly_logo_100px.png" style="height:25px;"/></div>'},
-            { type: 'left', size: 200, resizable: true, style: 'border-right: 1px solid silver;' },
-            { type: 'main', style: 'background-color: white;', content: '<div id="grid" style="width: 100%; height: 100%;"></div>' }
+            { type: 'top', size: 45, style: 'padding:5px;border: 0px; border-bottom: 1px solid silver; background-color: #fff; color: #555;', overflow: 'hidden', content: '<div class="title"> JDL <span class="title-small">jboss-deployment-lookup 0.1</span></div>'},
+            { type: 'left', style: 'padding-left:5px;padding-top:5px;',size: 200, resizable: true, minSize: 120, content: '<div id="sidebar" style="width: 100%; height: 100%;"></div>' },
+            { type: 'main', style: '', content: mainContent }
         ]
     });
 
-    w2ui['main_layout'].content('left', $().w2sidebar({
-        name: 'demo-sidebar',
-        img: null,
+    $('#sidebar').w2sidebar({ 
+        name: 'sidebar',
         nodes: [
-            { id: 'devList', text: 'Development List', img: 'icon-page' },
-            { id: 'prodList', text: 'Production List', img: 'icon-page' },
+            { id: 'main', text: 'Dashboard',    style: 'margin-left:0px', selected: true},
+            { id: 'logout', text: 'Logout',    style: 'margin-left:0px' },
+            {  text: '', style: 'margin-left:0px;margin-top:0px;padding-top: 0px;border-bottom: 1px solid #e9e9e9; height: 1px ;'},
+            { id: 'group1', text: 'SIT & DEV', group: true, expanded: true, nodes: [
+                { id: 'gridSITBIMA', text: 'BIMA',  img: 'icon-page', content: '<div id="grid" style="width: 100%; height: 100%;"></div>' },
+                { id: 'gridSITRITA', text: 'RITA',  img: 'icon-page' },
+                { id: 'gridSITNG', text: 'NG',  img: 'icon-page' },
+		{ id: 'gridSITBONSTRI', text: 'BONSTRI',  img: 'icon-page' },
+                { id: 'gridSITPOSS', text: 'POSS',  img: 'icon-page' },
+            ]},
+            { id: 'group2', text: 'PROD', group: true, expanded: true, nodes: [
+                { id: 'gridPRODBIMA', text: 'BIMA',  img: 'icon-page' }
+            ]},
         ],
         onClick: function (event) {
-            var cmd = event.target;
-            if (parseInt(cmd.substr(cmd.length-1)) != cmd.substr(cmd.length-1)) return;
-            var tmp = w2ui['demo-sidebar'].get(cmd);
-            document.title = tmp.parent.text + ': ' + tmp.text + ' | w2ui';
-            // delete previously created items
-            for (var widget in w2ui) {
-                var nm = w2ui[widget].name;
-                if (['main_layout', 'demo-sidebar'].indexOf(nm) == -1) $().w2destroy(nm);
+            disableMenu();
+            switch (event.target) {
+                case 'gridSITBIMA':
+                    w2ui['main_layout'].html('main', w2ui.dataSITBIMA)
+                    break;
+                case 'gridSITRITA':
+                    w2ui['main_layout'].html('main', w2ui.dataSITRITA);
+                    break;
+		          case 'gridSITBONSTRI':
+                    w2ui['main_layout'].html('main', w2ui.dataSITBONSTRI);
+                    break;
+                case 'gridSITNG':
+                    w2ui['main_layout'].html('main', w2ui.dataSITNG);
+                    break;
+                case 'gridPRODBIMA':
+                    w2ui['main_layout'].html('main', w2ui.dataPRODBIMA);
+                    break;
+                case 'gridSITPOSS':
+                    w2ui['main_layout'].html('main', w2ui.dataSITPOSS);
+                    break;
+                case 'logout':
+                    var r = confirm("Are you sure to logout?");
+                    if (r == true) {
+                        logout()
+                    }
+                    enableMenu()    
+                    break;
+                case 'main':
+                    enableMenu()
+                    w2ui['main_layout'].html('main', mainContent    )
+                    break;
             }
-            // set hash
-            if (tmp.parent && tmp.parent.id != '') {
-                var pid = w2ui['demo-sidebar'].get(cmd).parent.id;
-                document.location.hash = '!'+ pid + '/' + cmd;
-            }
-            // load example
-            $.get('examples/'+ cmd +'.html', function (data) {
-                
-            });
         }
-    }));
+    });
 
-    $('#grid').w2grid({ 
-        name: 'grid', 
-        url: 'monitoring/results',
-        method: 'GET',  
+    var dataColumn = [                
+        { field: 'name', text: 'Name', size: '100px' },
+        { field: 'ip', text: 'IP', size: '90px' },
+        { field: 'port', text: 'Port', size: '45px' },
+        { field: 'type', text: 'Server', size: '90px' },
+        { field: 'version', text: 'Version', size: '80px' },
+        { field: 'state', text: 'State', size: '50px' },
+        { field: 'cache', text: 'Cache', size: '50px',
+            render: function (record, index, column_index) {
+                var html = "<div class=\"detail-wrap\"><button style=\"width:20px\" class=\"btn-simple\" onClick=\"reloadCache('"+record.clearCacheUrl+"')\" ><i class=\"w2ui-icon-reload\" style=\"width: 20px;\"></i></button></div>";
+                return html;
+            }
+        },
+        { field: 'app', text: '', size: '30px', height: 'auto',
+            render: function (record, index, column_index) {
+                var html = "<div style=''>";
+                if(record.app == "N/A"){
+                    html = html+"N/A";
+                } else {
+                    var data = record.app.split("###");
+                    for (var i = 0; i < data.length; i++) {
+                        content = data[i].split("~");
+                        if(data[i] == null || data[i] == "" || content == undefined || content == null){
+                            continue;
+                        }
+                        if(content[0] == "true"){
+                            html = html+'<div class="detail-wrap"> <button class="btn-simple" style="width:20px;"><i class="w2ui-icon-check" style="color: #00D700; width: 20px;"></i></button> </div>';
+                        } else {
+                            html = html+'<div class="detail-wrap-disabled"> <button class="btn-simple" style="width:20px;"><i class="w2ui-icon-cross" style="color: #FF2424;width: 20px;"></i></button> </div>';
+                        }
+                    };
+                }
+                html = html+"</div>";
+                return html;
+            }
+        },
+        { field: 'app', text: 'Application', size: '600px', height: 'auto',
+            render: function (record, index, column_index) {
+                var html = "<div style=''>";
+                if(record.app == "N/A"){
+                    html = html+"N/A";
+                } else {
+                    var data = record.app.split("###");
+                    for (var i = 0; i < data.length; i++) {
+                        content = data[i].split("~");
+                        if(data[i] == null || data[i] == "" || content == undefined || content == null){
+                            continue;
+                        }
+                        if(content[0] == "true"){
+                            html = html+'<div class="detail-wrap">' + content[1] +'</div>';
+                        } else {
+                            html = html+'<div class="detail-wrap-disabled">' + content[1] +'</div>';
+                        }
+                    };
+                }
+                html = html+"</div>";
+                return html;
+            }
+        },
+    ];
+
+    $('#dataSITBONSTRI').w2grid({
+        name: 'dataSITBONSTRI',
+        url: 'monitoring/results/BONSTRISIT',
+        method: 'GET',
+        autoLoad : false,
         recordHeight : '50',
-        columns: [                
-            { field: 'name', caption: 'Name', size: '100px' },
-            { field: 'ip', caption: 'IP', size: '100px' },
-            { field: 'port', caption: 'Port', size: '50px' },
-            { field: 'type', caption: 'Type', size: '90px' },
-            { field: 'version', caption: 'Version', size: '70px' },
-            { field: 'state', caption: 'State', size: '50px' },
-            { field: 'cache', caption: 'Cache', size: '60px',
-                render: function (record, index, column_index) {
-                    var html = "<button style=\"width:50px\" class=\"btn-simple\" onClick=\"reloadCache('http://"+record.ip+":8080/api/v1/cache/reload-all-cache1')\" >Load</button>";
-                    return html;
-                }
-            },
-            { field: 'app', caption: 'Action', size: '150px', height: 'auto',
-                render: function (record, index, column_index) {
-                    var html = "<div style=''>";
-                    if(record.app == "N/A"){
-                        html = html+"N/A";
-                    } else {
-                        var data = record.app.split("###");
-                        for (var i = 0; i < data.length; i++) {
-                            content = data[i].split("~");
-                            if(data[i] == null || data[i] == "" || content == undefined || content == null){
-                                continue;
-                            }
-                            if(content[0] == "true"){
-                                html = html+'<div class="detail-wrap"> <button class="btn-simple" style="width:20px;background:none;background-color:#fff"><i class="w2ui-icon-check" style="color: #00D700; width: 20px;"></i></button> <button class="btn-simple" id="btnUnDep_'+record.id+'_'+i+'" onClick="undeploy(\''+record.id+'_'+i+'\', \'http://'+record.ip+':'+record.port+'\',\''+content[1]+'\')" >Undeploy</button> <button class="btn-simple" onClick="remove(\''+record.id+'_'+i+'\', \'http://'+record.ip+':'+record.port+'\',\''+content[1]+'\')" id="btnRem_'+record.id+'_'+i+'" >Remove</button></div>';
-                            } else {
-                                html = html+'<div class="detail-wrap-disabled"> <button class="btn-simple" style="width:20px;background:none;background-color:#fff"><i class="w2ui-icon-cross" style="color: #FF2424;width: 20px;"></i></button> <button class="btn-simple" id="btnDep_'+record.id+'_'+i+'" onClick="deploy(\''+record.id+'_'+i+'\', \'http://'+record.ip+':'+record.port+'\',\''+content[1]+'\')" >Deploy</button> <button class="btn-simple" onClick="remove(\''+record.id+'_'+i+'\', \'http://'+record.ip+':'+record.port+'\',\''+content[1]+'\')" id="btnRem_'+record.id+'_'+i+'"  >Remove</button></div>';
-                            }
-                        };
-                    }
-                    html = html+"</div>";
-                    return html;
-                }
-            },
-            { field: 'app', caption: 'Application', size: '600px', height: 'auto',
-                render: function (record, index, column_index) {
-                    var html = "<div style=''>";
-                    if(record.app == "N/A"){
-                        html = html+"N/A";
-                    } else {
-                        var data = record.app.split("###");
-                        for (var i = 0; i < data.length; i++) {
-                            content = data[i].split("~");
-                            if(data[i] == null || data[i] == "" || content == undefined || content == null){
-                                continue;
-                            }
-                            if(content[0] == "true"){
-                                html = html+'<div class="detail-wrap">' + content[1] +'</div>';
-                            } else {
-                                html = html+'<div class="detail-wrap-disabled">' + content[1] +'</div>';
-                            }
-                        };
-                    }
-                    html = html+"</div>";
-                    return html;
-                }
-            },
-        ]
+        style : 'margin:5px',
+        columns: dataColumn,
+        onLoad : function(){
+            enableMenu()
+        }
+    });
+
+    $('#dataSITBIMA').w2grid({ 
+        name: 'dataSITBIMA', 
+        url: 'monitoring/results/BIMASIT',
+        method: 'GET',  
+        autoLoad : false,  
+        recordHeight : '50',
+        style : 'margin:5px',
+        columns: dataColumn,
+        onLoad : function(){
+            enableMenu()
+        }
+    });    
+
+    $('#dataSITRITA').w2grid({ 
+        name: 'dataSITRITA', 
+        url: 'monitoring/results/RITASIT',
+        method: 'GET',  
+        autoLoad : false,  
+        recordHeight : '50',
+        style : 'margin:5px',
+        columns: dataColumn,
+        onLoad : function(){
+            enableMenu()
+        }
+    });    
+
+    $('#dataSITNG').w2grid({ 
+        name: 'dataSITNG', 
+        url: 'monitoring/results/NGSIT',
+        method: 'GET',  
+        autoLoad : false,  
+        recordHeight : '50',
+        style : 'margin:5px',
+        columns: dataColumn,
+        onLoad : function(){
+            enableMenu()
+        }
+    });  
+
+    $('#dataSITPOSS').w2grid({ 
+        name: 'dataSITPOSS', 
+        url: 'monitoring/results/POSSSIT',
+        method: 'GET',  
+        autoLoad : false,  
+        recordHeight : '50',
+        style : 'margin:5px',
+        columns: dataColumn,
+        onLoad : function(){
+            enableMenu()
+        }
+    });
+
+    $('#dataPRODBIMA').w2grid({ 
+        name: 'dataPRODBIMA', 
+        url: 'monitoring/results/BIMAPROD',
+        method: 'GET',  
+        autoLoad : false,  
+        recordHeight : '50',
+        style : 'margin:5px',
+        columns: dataColumn,
+        onLoad : function(){
+            enableMenu()
+        }
     });    
 });
+
+function disableMenu(){
+    w2ui.sidebar.disable('main')
+    w2ui.sidebar.disable('group1')
+    w2ui.sidebar.disable('group2')
+    w2ui.sidebar.disable('gridSITBIMA')
+    w2ui.sidebar.disable('gridSITRITA')
+    w2ui.sidebar.disable('gridSITNG')
+    w2ui.sidebar.disable('gridSITPOSS')
+    w2ui.sidebar.disable('gridSITBONSTRI')
+    w2ui.sidebar.disable('gridPRODBIMA')
+    w2ui.sidebar.disable('logout')
+}
+
+function enableMenu(){
+    w2ui.sidebar.enable('main')
+    w2ui.sidebar.enable('group1')
+    w2ui.sidebar.enable('group2')
+    w2ui.sidebar.enable('gridSITBIMA')
+    w2ui.sidebar.enable('gridSITRITA')
+    w2ui.sidebar.enable('gridSITNG')
+    w2ui.sidebar.enable('gridSITPOSS')
+    w2ui.sidebar.enable('gridSITBONSTRI')
+    w2ui.sidebar.enable('gridPRODBIMA')
+    w2ui.sidebar.enable('logout')
+}
+
+function logout() {
+    var out = window.location.href.replace(/:\/\//, '://log:out@');
+    $.get(out);
+    window.location.reload();
+}
 
 function deploy(id, url, content){
     if(confirm('Do you want to deploy this package?')){

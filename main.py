@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, Response, jsonify
+from flask import Flask, render_template, request, Response, jsonify, session
 import requests
 from requests.auth import HTTPDigestAuth
 from flask_httpauth import HTTPBasicAuth
@@ -12,23 +12,31 @@ app = Flask(__name__,
             static_folder='assets',
             template_folder='templates')
 
+app.secret_key = 'jbossy    '
 app.config['APPLICATION_ROOT'] = "/monitoring"
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+
 auth = HTTPBasicAuth()
 users = {
     "user1": generate_password_hash("jkt48"),
     "admin1": generate_password_hash("###3")
 }
+logged = ""
 
 @auth.verify_password
 def verify_password(username, password):
     if username in users:
-        return check_password_hash(users.get(username), password)
+        a = check_password_hash(users.get(username), password)
+        if a:
+            session['logged'] = username
+        return a;
     return False
 
 @app.route('/')
 @auth.login_required
 def root():
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', username=session['logged'])
 
 
 @app.route('/dashboard')
@@ -42,7 +50,7 @@ def dashboard(name=None):
 def data():
     url = 'http://10.64.20.173:9990/management'
     r = requests.get(url,
-                     proxies={"http": "http://10.0.144.183:8080"},
+                     # proxies={"http": "http://10.0.144.183:8080"},
                      auth=HTTPDigestAuth('sigit', 'sigit')
                      )
     return "results "+r.text
@@ -50,16 +58,16 @@ def data():
 def load(ip=None,username=None,password=None):
     url = "http://"+ip+"/management"
     r = requests.get(url,
-                     proxies={"http": "http://10.0.144.183:8080"},
+                     # proxies={"http": "http://10.0.144.183:8080"},
                      auth=HTTPDigestAuth(username, password)
                      )
     return r.text
 
 def getState(warName=None,ip=None,username=None,password=None):
-    warName = urllib.parse.quote_plus(warName)
+    warName = urllib.quote_plus(warName)
     url = "http://"+ip+"/management/deployment/"+warName+"?operation=attribute&name=enabled"
     r = requests.get(url,
-                     proxies={"http": "http://10.0.144.183:8080"},
+                     # proxies={"http": "http://10.0.144.183:8080"},
                      auth=HTTPDigestAuth(username, password)
                      )
     return r.text
@@ -88,7 +96,7 @@ def undeploy():
     headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
     r = requests.post(url,
         data = dataContent,
-        proxies={"http": "http://10.0.144.183:8080"},
+        # proxies={"http": "http://10.0.144.183:8080"},
         auth=HTTPDigestAuth('sigit', 'sigit'),
         headers=headers
     )
@@ -103,14 +111,15 @@ def remove():
     headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
     r = requests.post(url,
         data = dataContent,
-        proxies={"http": "http://10.0.144.183:8080"},
+        # proxies={"http": "http://10.0.144.183:8080"},
         auth=HTTPDigestAuth('sigit', 'sigit'),
         headers=headers
     )
     return r.content
 
 @app.route('/results')
-def results():
+@app.route('/results/<category>')
+def results(category=None):
     with open("config.json", 'r') as file:
         data = file.read()
     data = json.loads(data)
@@ -118,22 +127,29 @@ def results():
 
     for index,f in enumerate(records, start=0):
         try:
-            res = load(f["ip"]+":"+f["port"],f["username"],f["password"])
-            json_data = json.loads(res)
-            idCom = data["records"][index]["ip"].replace(".","")+data["records"][index]["port"]+"_"+str(index)
-            data["records"][index]["id"] = "WAR_"+idCom
-            data["records"][index]["name"] = json_data["name"]
-            data["records"][index]["type"] = json_data["product-name"]
-            data["records"][index]["version"] = json_data["product-version"]
-            data["records"][index]["state"] = "OK"
-            data["records"][index]["app"] = ""
-            runningWar = "N/A"
-            for index2, f2 in enumerate(json_data["deployment"], start=0):
-                warRes = getState(f2,f["ip"]+":"+f["port"],f["username"],f["password"])
-                #if warRes == "true":
-                data["records"][index]["app"] = data["records"][index]["app"]+warRes+"~"+f2+"###"
-            data["records"][index]["username"] = ""
-            data["records"][index]["password"] = ""
+            if data["records"][index]['category'] != category:
+                data["records"][index] = {}
+                continue
+            else:
+                res = load(f["ip"]+":"+f["port"],f["username"],f["password"])
+                json_data = json.loads(res)
+
+                idCom = data["records"][index]["ip"].replace(".","")+data["records"][index]["port"]+"_"+str(index)
+                data["records"][index]["id"] = "WAR_"+idCom
+                data["records"][index]["name"] = json_data["name"]
+                data["records"][index]["type"] = json_data["product-name"]
+                data["records"][index]["version"] = json_data["product-version"]
+                data["records"][index]["clearCacheUrl"] = f["clearCacheUrl"]
+                data["records"][index]["state"] = "OK"
+                data["records"][index]["app"] = ""
+                runningWar = "N/A"
+                for index2, f2 in enumerate(json_data["deployment"], start=0):
+                    warRes = getState(f2,f["ip"]+":"+f["port"],f["username"],f["password"])
+                    if warRes != "true":
+                        continue
+                    data["records"][index]["app"] = data["records"][index]["app"]+warRes+"~"+f2+"###"
+                data["records"][index]["username"] = ""
+                data["records"][index]["password"] = ""
         except:
             idCom = data["records"][index]["ip"].replace(".","")+data["records"][index]["port"]+"_"+str(index)
             data["records"][index]["id"] = "WAR_"+idCom
@@ -141,8 +157,12 @@ def results():
             data["records"][index]["type"] = "N/A"
             data["records"][index]["version"] = "N/A"
             data["records"][index]["state"] = "NOK"
+            data["records"][index]["clearCacheUrl"] = "NOK"
             data["records"][index]["app"] = "N/A"
             data["records"][index]["username"] = ""
             data["records"][index]["password"] = ""
+
+    data["records"] = [e for e in data["records"] if e]
+    data["total"] = len(data["records"])
 
     return Response(json.dumps(data), mimetype='application/json')
